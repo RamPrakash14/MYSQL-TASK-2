@@ -1,0 +1,194 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+-- -----------------------------------------------------
+-- Schema zen
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema zen
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `zen` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`query`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`query` (
+  `query_id` INT NOT NULL,
+  `query_text` VARCHAR(255) NULL,
+  `student_id` INT NOT NULL,
+  `mentor_id` INT NOT NULL,
+  PRIMARY KEY (`query_id`, `student_id`, `mentor_id`),
+  UNIQUE INDEX `query_id_UNIQUE` (`query_id` ASC) VISIBLE,
+  UNIQUE INDEX `student_id_UNIQUE` (`student_id` ASC) VISIBLE,
+  UNIQUE INDEX `mentor_id_UNIQUE` (`mentor_id` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+USE `zen` ;
+
+-- -----------------------------------------------------
+-- Table `zen`.`mentor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `zen`.`mentor` (
+  `mentor_id` INT NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `mobile` VARCHAR(10) NULL DEFAULT NULL,
+  `assigned_batch` VARCHAR(255) NULL DEFAULT NULL,
+  `student_id` INT NOT NULL,
+  `student_task_mentor_mentor_id` INT NOT NULL,
+  `batch_student_id` INT NOT NULL,
+  `batch_student_task_mentor_mentor_id` INT NOT NULL,
+  UNIQUE INDEX `email` (`email` ASC) VISIBLE,
+  PRIMARY KEY (`mentor_id`, `student_id`, `student_task_mentor_mentor_id`, `batch_student_id`, `batch_student_task_mentor_mentor_id`),
+  INDEX `fk_mentor_student1_idx` (`student_id` ASC, `student_task_mentor_mentor_id` ASC) VISIBLE,
+  INDEX `fk_mentor_batch1_idx` (`batch_student_id` ASC, `batch_student_task_mentor_mentor_id` ASC) VISIBLE,
+  CONSTRAINT `fk_mentor_student1`
+    FOREIGN KEY (`student_id` , `student_task_mentor_mentor_id`)
+    REFERENCES `zen`.`student` (`id` , `task_mentor_mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_mentor_batch1`
+    FOREIGN KEY (`batch_student_id` , `batch_student_task_mentor_mentor_id`)
+    REFERENCES `zen`.`batch` (`student_id` , `student_task_mentor_mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `zen`.`task`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `zen`.`task` (
+  `task_id` INT NULL DEFAULT NULL,
+  `task_name` VARCHAR(255) NULL DEFAULT NULL,
+  `student_id` INT NULL DEFAULT NULL,
+  `mentor_id` INT NULL DEFAULT NULL,
+  `student_name` VARCHAR(255) NULL DEFAULT NULL,
+  `mentor_name` VARCHAR(255) NULL DEFAULT NULL,
+  `mentor_mentor_id` INT NOT NULL,
+  PRIMARY KEY (`mentor_mentor_id`),
+  CONSTRAINT `fk_task_mentor1`
+    FOREIGN KEY (`mentor_mentor_id`)
+    REFERENCES `zen`.`mentor` (`mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `zen`.`student`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `zen`.`student` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(255) NULL DEFAULT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `mobile` VARCHAR(10) NULL DEFAULT NULL,
+  `address` VARCHAR(255) NULL DEFAULT NULL,
+  `education` VARCHAR(255) NULL DEFAULT NULL,
+  `task_mentor_mentor_id` INT NOT NULL,
+  PRIMARY KEY (`id`, `task_mentor_mentor_id`),
+  UNIQUE INDEX `email` (`email` ASC) VISIBLE,
+  INDEX `fk_student_task1_idx` (`task_mentor_mentor_id` ASC) VISIBLE,
+  CONSTRAINT `fk_student_task1`
+    FOREIGN KEY (`task_mentor_mentor_id`)
+    REFERENCES `zen`.`task` (`mentor_mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `zen`.`batch`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `zen`.`batch` (
+  `batch_id` INT NULL DEFAULT NULL,
+  `batch_name` VARCHAR(255) NULL DEFAULT NULL,
+  `batch_language` VARCHAR(255) NULL DEFAULT NULL,
+  `total_students` INT NULL DEFAULT NULL,
+  `student_id` INT NOT NULL,
+  `student_task_mentor_mentor_id` INT NOT NULL,
+  PRIMARY KEY (`student_id`, `student_task_mentor_mentor_id`),
+  CONSTRAINT `fk_batch_student1`
+    FOREIGN KEY (`student_id` , `student_task_mentor_mentor_id`)
+    REFERENCES `zen`.`student` (`id` , `task_mentor_mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `zen`.`query`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `zen`.`query` (
+  `query_id` INT NULL DEFAULT NULL,
+  `query_topic` VARCHAR(255) NULL DEFAULT NULL,
+  `student_id` INT NULL DEFAULT NULL,
+  `mentor_id` INT NULL DEFAULT NULL,
+  `student_id1` INT NOT NULL,
+  `student_task_mentor_mentor_id` INT NOT NULL,
+  `mentor_mentor_id` INT NOT NULL,
+  `mentor_student_id` INT NOT NULL,
+  `mentor_student_task_mentor_mentor_id` INT NOT NULL,
+  PRIMARY KEY (`student_id1`, `student_task_mentor_mentor_id`, `mentor_mentor_id`, `mentor_student_id`, `mentor_student_task_mentor_mentor_id`),
+  INDEX `fk_query_mentor1_idx` (`mentor_mentor_id` ASC, `mentor_student_id` ASC, `mentor_student_task_mentor_mentor_id` ASC) VISIBLE,
+  CONSTRAINT `fk_query_student1`
+    FOREIGN KEY (`student_id1` , `student_task_mentor_mentor_id`)
+    REFERENCES `zen`.`student` (`id` , `task_mentor_mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_query_mentor1`
+    FOREIGN KEY (`mentor_mentor_id` , `mentor_student_id` , `mentor_student_task_mentor_mentor_id`)
+    REFERENCES `zen`.`mentor` (`mentor_id` , `student_id` , `student_task_mentor_mentor_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `zen`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `zen`.`user` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(255) NULL DEFAULT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `mobile` VARCHAR(10) NULL DEFAULT NULL,
+  `createdAt` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  `student_id` INT NOT NULL,
+  PRIMARY KEY (`id`, `student_id`),
+  UNIQUE INDEX `email` (`email` ASC) VISIBLE,
+  INDEX `fk_user_student_idx` (`student_id` ASC) VISIBLE,
+  CONSTRAINT `fk_user_student`
+    FOREIGN KEY (`student_id`)
+    REFERENCES `zen`.`student` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
